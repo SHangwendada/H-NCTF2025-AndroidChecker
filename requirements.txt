@@ -1,0 +1,4 @@
+Flask>=2.0.0
+uiautomator2>=2.12.0
+androguard>=3.3.5
+loguru>=0.7.0

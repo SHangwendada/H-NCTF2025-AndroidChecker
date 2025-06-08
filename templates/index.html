@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>APK Installer</title>
+    <style>
+        .flag-container {
+            margin-top: 25px;
+            padding: 20px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #ecf0f1 100%);
+            border-left: 4px solid #27ae60;
+            border-radius: 8px;
+            margin-bottom:25px;
+        }
+
+        .flag-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #27ae60;
+            text-align: center;
+            margin-top: 10px;
+            word-break: break-all;
+        }
+
+        /* 添加测试失败状态的颜色 */
+        .status-test_failed {
+            color: #e67e22;
+        }
+        .screenshot-countdown {
+            padding: 10px;
+            background: #f39c12;
+            color: white;
+            border-radius: 5px;
+            text-align: center;
+            margin: 15px 0;
+            font-weight: 600;
+        }
+
+        .screenshot-countdown span {
+            font-size: 1.2em;
+            font-weight: 700;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            margin: 20px;
+        }
+        .header {
+            background: linear-gradient(90deg, #3498db, #2c3e50);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 32px;
+            font-weight: 600;
+        }
+        .header p {
+            margin: 10px 0 0;
+            opacity: 0.9;
+            font-size: 16px;
+        }
+        .content {
+            padding: 30px;
+        }
+        .card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            padding: 25px;
+            margin-bottom: 25px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+        .card-title {
+            font-size: 20px;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
+        .card-title i {
+            margin-right: 10px;
+            color: #3498db;
+        }
+        .upload-container {
+            border: 2px dashed #3498db;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 20px;
+            background-color: #f8f9fa;
+            transition: all 0.3s;
+            position: relative;
+        }
+        .upload-container.highlight {
+            background-color: #e8f4ff;
+            border-color: #2980b9;
+        }
+        .file-input {
+            display: none;
+        }
+        .file-label {
+            display: inline-block;
+            padding: 15px 40px;
+            background: linear-gradient(90deg, #3498db, #2c3e50);
+            color: white;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 10px rgba(52, 152, 219, 0.3);
+        }
+        .file-label:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(52, 152, 219, 0.4);
+        }
+        .file-info {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+        .file-error {
+            color: #e74c3c;
+            font-weight: 500;
+            margin-top: 10px;
+        }
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(90deg, #3498db, #2c3e50);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 10px rgba(52, 152, 219, 0.3);
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(52, 152, 219, 0.4);
+        }
+        .btn:disabled {
+            background: #bdc3c7;
+            transform: none;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+        .status-area {
+            margin-top: 30px;
+            display: none;
+        }
+        .status-card {
+            background: linear-gradient(135deg, #f8f9fa 0%, #ecf0f1 100%);
+            border-left: 4px solid #3498db;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .status-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+        .status-title {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 18px;
+        }
+        .status-value {
+            font-weight: 600;
+            font-size: 16px;
+        }
+        .status-queued { color: #f39c12; }
+        .status-installing { color: #3498db; }
+        .status-success { color: #27ae60; }
+        .status-failed { color: #e74c3c; }
+        .progress-container {
+            margin: 20px 0;
+            height: 12px;
+            background: #dfe6e9;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #3498db, #2ecc71);
+            width: 0%;
+            transition: width 0.5s cubic-bezier(0.65, 0, 0.35, 1);
+        }
+        .screenshot-container {
+            margin-top: 25px;
+            text-align: center;
+            display: none;
+        }
+        .screenshot {
+            max-width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        .queue-info {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 15px;
+            font-weight: 500;
+        }
+        .admin-link {
+            text-align: center;
+            margin-top: 20px;
+            color: #7f8c8d;
+        }
+        .admin-link a {
+            color: #3498db;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .admin-link a:hover {
+            text-decoration: underline;
+        }
+        .footer {
+            text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .device-info {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        .device-status {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+        .device-connected {
+            background: #27ae60;
+            color: white;
+        }
+        .device-disconnected {
+            background: #e74c3c;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>APK 安装服务</h1>
+            <p>上传您的APK文件，自动安装到测试设备</p>
+        </div>
+
+        <div class="content">
+            <div class="card">
+                <div class="card-title">
+                    <i>📱</i> 上传APK文件
+                </div>
+
+                <div class="upload-container" id="dropZone">
+                    <input accept=".apk" class="file-input" id="apkFile" type="file">
+                    <label class="file-label" for="apkFile">选择 APK 文件</label>
+                    <div class="file-info" id="fileInfo">或拖放文件到此处</div>
+                    <div class="file-error" id="fileError"></div>
+                </div>
+
+                <button class="btn" disabled id="uploadBtn">
+                    上传并安装
+                </button>
+            </div>
+
+            <div class="card" id="statusArea">
+                <div class="card-title">
+                    <i>📊</i> 安装状态
+                </div>
+
+                <div class="status-card">
+                    <div class="status-header">
+                        <div class="status-title">任务 ID:</div>
+                        <div class="status-value" id="taskId">-</div>
+                    </div>
+                </div>
+
+                <div class="status-card">
+                    <div class="status-header">
+                        <div class="status-title">状态:</div>
+                        <div class="status-value status-queued" id="taskStatus">等待中</div>
+                    </div>
+                </div>
+
+                <div class="progress-container">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+
+                <div class="queue-info">
+                    当前队列位置: <span id="queuePos">0</span>
+                </div>
+
+                <div class="screenshot-container" id="screenshotContainer">
+                    <div class="status-header">
+                        <div class="status-title">设备截图:</div>
+                    </div>
+                    <img alt="设备截图" class="screenshot" id="screenshotImg" src="">
+                </div>
+            </div>
+
+            <div class="device-info">
+                <div>
+                    <strong>设备ID:</strong> emulator-5554
+                </div>
+                <div>
+                    <strong>状态:</strong>
+                    <span class="device-status device-connected" id="deviceStatus">已连接</span>
+                </div>
+            </div>
+
+            <div class="admin-link">
+                管理员? <a href="/login">登录管理面板</a>
+            </div>
+        </div>
+
+        <div class="footer">
+            APK 大小限制: 20MB | 仅支持 .apk 文件格式
+        </div>
+    </div>
+
+    <script>
+        // 获取DOM元素
+        const fileInput = document.getElementById('apkFile');
+        const fileInfo = document.getElementById('fileInfo');
+        const fileError = document.getElementById('fileError');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const statusArea = document.getElementById('statusArea');
+        const taskIdElement = document.getElementById('taskId');
+        const taskStatusElement = document.getElementById('taskStatus');
+        const progressBar = document.getElementById('progressBar');
+        const queuePosElement = document.getElementById('queuePos');
+        const screenshotContainer = document.getElementById('screenshotContainer');
+        const screenshotImg = document.getElementById('screenshotImg');
+        const dropZone = document.getElementById('dropZone');
+        const deviceStatus = document.getElementById('deviceStatus');
+
+        // 文件选择处理
+        fileInput.addEventListener('change', function() {
+            if (this.files.length > 0) {
+                handleFile(this.files[0]);
+            }
+        });
+
+        // 拖放功能
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('highlight');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('highlight');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('highlight');
+
+            if (e.dataTransfer.files.length > 0) {
+                const file = e.dataTransfer.files[0];
+                handleFile(file);
+
+                // 设置文件输入
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(file);
+                fileInput.files = dataTransfer.files;
+            }
+        });
+
+        // 文件处理函数
+        function handleFile(file) {
+            // 重置错误信息
+            fileError.textContent = '';
+
+            // 前端验证
+            let valid = true;
+
+            if (!file.name.toLowerCase().endsWith('.apk')) {
+                fileError.textContent = '错误: 仅支持 APK 文件';
+                valid = false;
+            } else if (file.size > 20 * 1024 * 1024) {
+                fileError.textContent = '错误: 文件大小超过 15MB 限制';
+                valid = false;
+            }
+
+            if (valid) {
+                fileInfo.innerHTML = `
+                    <strong>${file.name}</strong><br>
+                    ${(file.size / 1024 / 1024).toFixed(2)} MB
+                `;
+                fileInfo.style.color = '#27ae60';
+                uploadBtn.disabled = false;
+            } else {
+                fileInfo.textContent = '拖放文件或点击选择';
+                fileInfo.style.color = '#7f8c8d';
+                uploadBtn.disabled = true;
+            }
+        }
+
+        // 上传处理
+        uploadBtn.addEventListener('click', uploadFile);
+
+        // 上传文件函数
+        function uploadFile() {
+            const file = fileInput.files[0];
+
+            if (!file) {
+                showError("请选择 APK 文件");
+                return;
+            }
+
+            // 禁用按钮防止重复提交
+            uploadBtn.disabled = true;
+            uploadBtn.innerHTML = '<span class="loading"></span> 上传中...';
+
+            // 显示状态区域
+            statusArea.style.display = 'block';
+
+            // 重置状态
+            taskIdElement.textContent = '-';
+            taskStatusElement.textContent = '等待中';
+            taskStatusElement.className = 'status-value status-queued';
+            progressBar.style.width = '0%';
+            queuePosElement.textContent = '0';
+            screenshotContainer.style.display = 'none';
+
+            // 上传文件
+            const formData = new FormData();
+            formData.append('file', file);
+
+            // 创建XMLHttpRequest以获取上传进度
+            const xhr = new XMLHttpRequest();
+
+            // 上传进度事件
+            xhr.upload.addEventListener('progress', (e) => {
+                if (e.lengthComputable) {
+                    const percent = (e.loaded / e.total) * 100;
+                    progressBar.style.width = `${percent}%`;
+                }
+            });
+
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === XMLHttpRequest.DONE) {
+                    if (xhr.status === 200) {
+                        const data = JSON.parse(xhr.responseText);
+                        handleUploadResponse(data);
+                    } else {
+                        try {
+                            const errorData = JSON.parse(xhr.responseText);
+                            showError(`上传失败: ${errorData.error}`);
+                        } catch {
+                            showError(`上传失败: ${xhr.statusText}`);
+                        }
+                        resetUploadButton();
+                    }
+                }
+            };
+
+            xhr.open('POST', '/upload', true);
+            xhr.send(formData);
+        }
+
+        // 处理上传响应
+        function handleUploadResponse(data) {
+            if (data.error) {
+                showError(data.error);
+                resetUploadButton();
+                return;
+            }
+
+            // 显示任务信息
+            taskIdElement.textContent = data.task_id;
+            taskStatusElement.textContent = data.status;
+            queuePosElement.textContent = data.queue_position;
+
+            // 更新状态颜色
+            updateStatusColor(data.status);
+
+            // 开始轮询状态
+            pollStatus(data.task_id);
+        }
+
+        // 轮询任务状态
+        function pollStatus(taskId) {
+        let attempts = 0;
+        const maxAttempts = 300;
+
+        const checkStatus = () => {
+            fetch(`/status/${taskId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        showError(data.error);
+                        resetUploadButton();
+                        return;
+                    }
+
+                    // 更新状态
+                    taskStatusElement.textContent = data.status;
+                    updateStatusColor(data.status);
+
+                    // 更新进度条
+                    if (data.progress) {
+                        progressBar.style.width = `${data.progress}%`;
+                    }
+
+                    // 更新队列位置
+                    if (data.queue_position !== undefined) {
+                        queuePosElement.textContent = data.queue_position;
+                    }
+
+                    // 处理截图倒计时显示 - 修复点
+                    if (data.screenshot_countdown !== undefined && data.screenshot_countdown > 0) {
+                        let countdownElement = document.getElementById('screenshotCountdown');
+                        if (!countdownElement) {
+                            const countdownHtml = `
+                                <div class="screenshot-countdown" id="screenshotCountdown">
+                                    测试中倒计时: <span id="countdownValue">${data.screenshot_countdown}</span>秒
+                                </div>
+                            `;
+
+                            const statusCards = document.querySelectorAll('.status-card');
+                            if (statusCards.length > 0) {
+                                statusCards[statusCards.length - 1].insertAdjacentHTML('afterend', countdownHtml);
+                            } else {
+                                statusArea.insertAdjacentHTML('afterbegin', countdownHtml);
+                            }
+                        } else {
+                            document.getElementById('countdownValue').textContent = data.screenshot_countdown;
+                        }
+                    }
+                   if (data.status === 'TEST_FAILED') {
+                        uploadBtn.textContent = '测试失败';
+                        uploadBtn.style.background = 'linear-gradient(90deg, #e67e22, #d35400)';
+
+                        // 显示错误信息
+                        showError(data.message);
+
+                        // 显示截图
+                        if (data.screenshot) {
+                            screenshotImg.src = `/screenshots/${data.screenshot}?t=${new Date().getTime()}`;
+                            screenshotContainer.style.display = 'block';
+                        }
+
+                        // 5秒后重置
+                       {# setTimeout(() => {
+                            resetUI();
+                        }, 5000*2);#}
+                    }
+                    // 处理不同状态
+                    else if (data.status === 'SUCCESS') {
+                        uploadBtn.innerHTML = '✅ 测试成功!';
+                        uploadBtn.style.background = 'linear-gradient(90deg, #2ecc71, #27ae60)';
+
+
+                        const flagElement = document.createElement('div');
+                        flagElement.className = 'flag-container';
+                        flagElement.innerHTML = `
+                            <div class="status-header">
+                                <div class="status-title">Flag:</div>
+                            </div>
+                            <div class="flag-value">${data.message.replace('测试成功！Flag: ', '')}</div>
+                        `;
+
+                        // 插入到状态区域
+                        const statusCard = document.querySelector('.status-card');
+                        if (statusCard) {
+                            statusCard.insertAdjacentElement('afterend', flagElement);
+                        }
+
+        {#                // 5秒后重置UI
+                        setTimeout(() => {
+                            resetUI();
+                        }, 10000);#}
+                    }
+                    else if (data.status === 'FAILED' || data.status.startsWith('ERROR')) {
+                        uploadBtn.textContent = '安装失败';
+                        uploadBtn.style.background = 'linear-gradient(90deg, #e74c3c, #c0392b)';
+
+                        // 显示错误信息
+                        if (data.message) {
+                            showError(data.message);
+                        }
+
+                        {#setTimeout(() => {
+                            resetUI();
+                        }, 10000);#}
+                    }
+                    else if (data.status === 'INSTALLING') {
+                        uploadBtn.innerHTML = '<span class="loading"></span> 安装中...';
+
+                        // 继续轮询
+                        if (attempts < maxAttempts) {
+                            attempts++;
+                            setTimeout(checkStatus, 1000);
+                        } else {
+                            showError("状态检查超时");
+                            resetUploadButton();
+                        }
+                    }
+                    else { // QUEUED
+                        uploadBtn.innerHTML = '<span class="loading"></span> 排队中...';
+
+                        // 继续轮询
+                        if (attempts < maxAttempts) {
+                            attempts++;
+                            setTimeout(checkStatus, 2000);
+                        } else {
+                            showError("状态检查超时");
+                            resetUploadButton();
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('状态检查错误:', error);
+                    if (attempts < maxAttempts) {
+                        attempts++;
+                        setTimeout(checkStatus, 2000);
+                    } else {
+                        showError("状态检查失败");
+                        resetUploadButton();
+                    }
+            });
+        };
+
+    // 开始轮询
+    checkStatus();
+}
+
+        // 更新状态颜色
+        function updateStatusColor(status) {
+            taskStatusElement.className = 'status-value ';
+
+            if (status === 'QUEUED') {
+                taskStatusElement.classList.add('status-queued');
+            } else if (status === 'INSTALLING') {
+                taskStatusElement.classList.add('status-installing');
+            } else if (status === 'SUCCESS') {
+                taskStatusElement.classList.add('status-success');
+            } else if (status.startsWith('ERROR') || status === 'FAILED') {
+                taskStatusElement.classList.add('status-failed');
+            }
+        }
+
+        // 显示错误
+        function showError(message) {
+            fileError.textContent = message;
+            fileError.style.display = 'block';
+        }
+
+        // 重置上传按钮
+        function resetUploadButton() {
+            uploadBtn.disabled = false;
+            uploadBtn.innerHTML = '上传并安装';
+            uploadBtn.style.background = 'linear-gradient(90deg, #3498db, #2c3e50)';
+        }
+
+        // 重置UI
+        function resetUI() {
+            fileInput.value = '';
+            fileInfo.innerHTML = '拖放文件或点击选择';
+            fileInfo.style.color = '#7f8c8d';
+            fileError.textContent = '';
+            resetUploadButton();
+       }
+
+        // 初始检查设备状态
+        function checkDeviceStatus() {
+            fetch('/status/device')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'connected') {
+                        deviceStatus.textContent = '已连接';
+                        deviceStatus.className = 'device-status device-connected';
+                    } else {
+                        deviceStatus.textContent = '未连接';
+                        deviceStatus.className = 'device-status device-disconnected';
+                    }
+                })
+                .catch(() => {
+                    deviceStatus.textContent = '状态未知';
+                    deviceStatus.className = 'device-status device-disconnected';
+                });
+        }
+
+        // 每30秒检查一次设备状态
+        checkDeviceStatus();
+        setInterval(checkDeviceStatus, 2000);
+    </script>
+</body>
+</html>
