@@ -6,9 +6,9 @@ H&amp;NCTF2025安卓题目的checker方案与实现，用户上传APK文件后�
 
 在本次 H&NCTF 2025 中，我们实现了两个 Checker，分别用于 JustAndroid 的 PWN 题和 RealCrackMe。
 
-JustAndroid Checker 的核心功能是在运行选手上传的 APK 后返回截图。为了防止选手上传与环境中 PWN 题所用 APK 包名相同的文件，从而覆盖原有环境，我在此 Checker 中引入了 androguard，用于在安装前提取 APK 的包名进行校验。但需要注意的是，androguard 的使用会带来一定的性能损耗。
+JustAndroid Checker 的核心功能是在运行选手上传的 APK 后返回截图。为了防止选手上传与环境中 PWN 题所用 APK 包名相同的文件，从而覆盖原有环境，我在此 Checker 中使用了 androguard，用于在安装前提取 APK 的包名进行校验。但需要注意的是，androguard 的在解析包名时会带来一定的性能损耗。
 
-因此，在 RealCrackMe Checker 中，我优化了检测方式，改为在 APK 安装完成后，通过检测当前运行的上层应用包名来判断是否为恶意覆盖，避免了安装前解析带来的性能损耗。
+因此，在 RealCrackMe Checker 中，我优化了检测方式，改为在 APK 安装完成后，通过检测当前运行的上层应用包名来判断是否为待测试包名，取消了在安装前对包名解析带来的时间及性能损耗。
 
 值得一提的是，JustAndroid Checker 中原本也实现了安装前检测包名的逻辑，相关代码目前已被注释。如有需要，可参考并启用这部分代码。
 
